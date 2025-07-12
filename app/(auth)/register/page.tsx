@@ -2,6 +2,7 @@ import { LoginForm } from "@/components/auth/login-form"
 import { GalleryVerticalEnd } from "lucide-react"
 import Image from 'next/image';
 import img from '../../../assets/img/logo.png';
+import { RegisterForm } from "@/components/auth/register-form";
 
 
 
@@ -17,7 +18,7 @@ export default function LoginPage() {
                     height={220}
                     quality={80}
                 />
-                <LoginForm />
+                <RegisterForm />
                 </div>
             </div>
         </div>
