@@ -3,7 +3,7 @@ export default function Home() {
     <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-4 items-center">
         <h1 className="text-3xl sm:text-5xl font-bold tracking-tight">
-          We are building the biggest sports gathering software.
+          We are building the biggest sports community in India.
         </h1>
         <p className="text-lg text-muted-foreground">Stay tuned!</p>
         <p className="text-base">
