@@ -5,6 +5,7 @@ import Image from 'next/image';
 import img from '../../../assets/img/logo.png';
 import { Suspense, use } from "react";
 import { useSession, signIn, signOut } from "next-auth/react"
+import { redirect } from "next/navigation";
 
 
 
@@ -12,13 +13,9 @@ export default function LoginPage() {
     const { data: session } = useSession()
 
     if (session) {
-        return (
-            <>
-                Signed in as {session?.user?.email} <br />
-                <button onClick={() => signOut()}>Sign out</button>
-            </>
-        )
+        redirect("/");
     }
+    
     return (
         <div className="flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
             <div className="flex w-full max-w-sm flex-col gap-6">

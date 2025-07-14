@@ -1,3 +1,7 @@
+"use client"
+import { Button } from "@/components/ui/button";
+import { signOut } from "next-auth/react";
+
 export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center font-[family-name:var(--font-geist-sans)]">
@@ -14,6 +18,7 @@ export default function Home() {
           >
             info.playbuddys@gmail.com
           </a>
+          <Button onClick={()=> signOut()}>Sign out</Button>
         </p>
       </main>
     </div>

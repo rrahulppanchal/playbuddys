@@ -7,6 +7,8 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { signIn } from "next-auth/react";
+
 
 const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -172,9 +174,7 @@ export function RegisterForm({
             variant="outline"
             type="button"
             className="w-full"
-            onClick={() => {
-              window.location.href = "/api/auth/callback/google";
-            }}
+            onClick={() => signIn("google")}
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <path

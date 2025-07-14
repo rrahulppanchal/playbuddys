@@ -15,6 +15,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams, redirect } from 'next/navigation';
+import { signIn } from "next-auth/react";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -75,7 +76,7 @@ export function LoginForm({
                 <Button
                   variant="outline"
                   type="button"
-                  onClick={() => { redirect(`/api/auth/callback/google`) }}
+                  onClick={() => signIn("google")}
                   className="w-full"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
