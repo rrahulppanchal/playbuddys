@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
+import Header from "@/components/layout/header";
 
 // Sports and types data
 const sports = [
@@ -226,7 +227,7 @@ export default function CreateFixture() {
         alert(JSON.stringify(data, null, 2));
     };
 
-    return (
+    return (<><Header />
         <form
             className="w-full max-w-4xl mx-auto py-10 px-4 flex flex-col gap-8"
             onSubmit={handleSubmit(onSubmit)}
@@ -838,6 +839,6 @@ export default function CreateFixture() {
                     Submit
                 </Button>
             </div>
-        </form>
+        </form></>
     );
 }
