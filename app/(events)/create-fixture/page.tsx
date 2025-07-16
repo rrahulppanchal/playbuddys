@@ -137,7 +137,6 @@ const indianStates = [
     { name: "Tamil Nadu", cities: ["Chennai", "Coimbatore", "Madurai", "Salem"] },
     { name: "West Bengal", cities: ["Kolkata", "Howrah", "Durgapur", "Siliguri"] },
     { name: "Uttar Pradesh", cities: ["Lucknow", "Kanpur", "Agra", "Varanasi"] },
-    // ...add more states and cities as needed
 ];
 
 // Time intervals (15 min gap)
@@ -164,6 +163,8 @@ const schema = z.object({
         .instanceof(File)
         .optional()
         .or(z.literal(undefined)),
+    privacy: z.enum(["public", "private"]),
+    eventPassword: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -195,12 +196,14 @@ export default function CreateFixture() {
             time: "",
             sport: undefined,
             types: [],
+            privacy: "public",
+            eventPassword: "",
         },
     });
 
     const selectedSport = watch("sport");
-    const selectedTypes = watch("types");
     const selectedState = watch("state");
+    const selectedPrivacy = watch("privacy");
 
     // Filter types by selected sport
     const filteredTypes = selectedSport
@@ -227,618 +230,689 @@ export default function CreateFixture() {
         alert(JSON.stringify(data, null, 2));
     };
 
-    return (<><Header />
-        <form
-            className="w-full max-w-4xl mx-auto py-10 px-4 flex flex-col gap-8"
-            onSubmit={handleSubmit(onSubmit)}
-        >
-            {/* Heading */}
-            <h1 className="text-3xl font-bold text-center mb-2">Create Event</h1>
+    return (
+        <>
+            <Header />
+            <form
+                className="w-full max-w-4xl mx-auto py-10 px-4 flex flex-col gap-8"
+                onSubmit={handleSubmit(onSubmit)}
+            >
+                {/* Heading */}
+                <h1 className="text-3xl font-bold text-center mb-2">Create Event</h1>
 
-            {/* Game Details Card */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Game Details</CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Game Name */}
-                    <div>
-                        <label className="flex items-center gap-2 mb-2 font-medium">
-                            <Gamepad2 className="h-5 w-5 text-green-700" />
-                            Game Name
-                        </label>
-                        <Controller
-                            control={control}
-                            name="gameName"
-                            render={({ field }) => (
-                                <Input
-                                    {...field}
-                                    type="text"
-                                    className={cn("w-full", errors.gameName && "border-red-500")}
-                                    placeholder="Enter game name"
-                                />
+                {/* Game Details Card */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Game Details</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Game Name */}
+                        <div>
+                            <label className="flex items-center gap-2 mb-2 font-medium">
+                                <Gamepad2 className="h-5 w-5 text-green-700" />
+                                Game Name
+                            </label>
+                            <Controller
+                                control={control}
+                                name="gameName"
+                                render={({ field }) => (
+                                    <Input
+                                        {...field}
+                                        type="text"
+                                        className={cn("w-full", errors.gameName && "border-red-500")}
+                                        placeholder="Enter game name"
+                                    />
+                                )}
+                            />
+                            {errors.gameName && (
+                                <p className="text-xs text-red-500 mt-1">{errors.gameName.message}</p>
                             )}
-                        />
-                        {errors.gameName && (
-                            <p className="text-xs text-red-500 mt-1">{errors.gameName.message}</p>
-                        )}
-                    </div>
-                    {/* Sport */}
-                    <div>
-                        <label className="flex items-center gap-2 mb-2 font-medium">
-                            <ListOrdered className="h-5 w-5 text-green-700" />
-                            Sport
-                        </label>
-                        <Controller
-                            control={control}
-                            name="sport"
-                            render={({ field }) => (
-                                <Popover open={sportOpen} onOpenChange={setSportOpen}>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant="outline"
-                                            role="combobox"
-                                            aria-expanded={sportOpen}
-                                            className={cn("w-full justify-between items-center", errors.sport && "border-red-500")}
-                                        >
-                                            {field.value
-                                                ? sports.find((s) => s.id === field.value)?.sport
-                                                : "Select sport"}
-                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-full p-0">
-                                        <Command>
-                                            <CommandInput placeholder="Search sport..." />
-                                            <CommandList>
-                                                <CommandEmpty>No sport found.</CommandEmpty>
-                                                {sports.map((sport) => (
-                                                    <CommandItem
-                                                        key={sport.id}
-                                                        value={sport.sport}
-                                                        onSelect={() => {
-                                                            field.onChange(sport.id);
-                                                            setSportOpen(false);
-                                                        }}
-                                                    >
-                                                        <Check
-                                                            className={cn(
-                                                                "mr-2 h-4 w-4",
-                                                                field.value === sport.id ? "opacity-100" : "opacity-0"
-                                                            )}
-                                                        />
-                                                        {sport.sport}
-                                                    </CommandItem>
-                                                ))}
-                                            </CommandList>
-                                        </Command>
-                                    </PopoverContent>
-                                </Popover>
-                            )}
-                        />
-                        {errors.sport && (
-                            <p className="text-xs text-red-500 mt-1">{errors.sport.message}</p>
-                        )}
-                    </div>
-                    {/* Type */}
-                    <div>
-                        <label className="flex items-center gap-2 mb-2 font-medium">
-                            <ListChecks className="h-5 w-5 text-green-700" />
-                            Type
-                        </label>
-                        <Controller
-                            control={control}
-                            name="types"
-                            render={({ field }) => (
-                                <>
-                                    <Popover open={typeOpen} onOpenChange={setTypeOpen}>
+                        </div>
+                        {/* Sport */}
+                        <div>
+                            <label className="flex items-center gap-2 mb-2 font-medium">
+                                <ListOrdered className="h-5 w-5 text-green-700" />
+                                Sport
+                            </label>
+                            <Controller
+                                control={control}
+                                name="sport"
+                                render={({ field }) => (
+                                    <Popover open={sportOpen} onOpenChange={setSportOpen}>
                                         <PopoverTrigger asChild>
                                             <Button
                                                 variant="outline"
                                                 role="combobox"
-                                                aria-expanded={typeOpen}
-                                                className={cn("w-full justify-between items-center", errors.types && "border-red-500")}
-                                                disabled={!selectedSport}
+                                                aria-expanded={sportOpen}
+                                                className={cn("w-full justify-between items-center", errors.sport && "border-red-500")}
                                             >
-                                                {field.value.length > 0
-                                                    ? `${field.value.length} selected`
-                                                    : "Select type(s)"}
+                                                {field.value
+                                                    ? sports.find((s) => s.id === field.value)?.sport
+                                                    : "Select sport"}
                                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                             </Button>
                                         </PopoverTrigger>
                                         <PopoverContent className="w-full p-0">
                                             <Command>
-                                                <CommandInput placeholder="Search type..." />
+                                                <CommandInput placeholder="Search sport..." />
                                                 <CommandList>
-                                                    <CommandEmpty>No type found.</CommandEmpty>
-                                                    {filteredTypes.map((typeObj) => (
+                                                    <CommandEmpty>No sport found.</CommandEmpty>
+                                                    {sports.map((sport) => (
                                                         <CommandItem
-                                                            key={typeObj.type}
-                                                            value={typeObj.type}
+                                                            key={sport.id}
+                                                            value={sport.sport}
                                                             onSelect={() => {
-                                                                if (field.value.includes(typeObj.type)) {
-                                                                    field.onChange(
-                                                                        field.value.filter((t: string) => t !== typeObj.type)
-                                                                    );
-                                                                } else {
-                                                                    field.onChange([
-                                                                        ...field.value,
-                                                                        typeObj.type,
-                                                                    ]);
-                                                                }
+                                                                field.onChange(sport.id);
+                                                                setSportOpen(false);
                                                             }}
                                                         >
                                                             <Check
                                                                 className={cn(
                                                                     "mr-2 h-4 w-4",
-                                                                    field.value.includes(typeObj.type)
-                                                                        ? "opacity-100"
-                                                                        : "opacity-0"
+                                                                    field.value === sport.id ? "opacity-100" : "opacity-0"
                                                                 )}
                                                             />
-                                                            {typeObj.type}
+                                                            {sport.sport}
                                                         </CommandItem>
                                                     ))}
                                                 </CommandList>
                                             </Command>
                                         </PopoverContent>
                                     </Popover>
-                                    {field.value.length > 0 && (
-                                        <div className="flex flex-wrap gap-2 mt-2 w-full">
-                                            {field.value.map((type: string) => (
-                                                <span
-                                                    key={type}
-                                                    className="inline-flex items-center px-2 py-1 bg-primary text-muted rounded text-xs"
+                                )}
+                            />
+                            {errors.sport && (
+                                <p className="text-xs text-red-500 mt-1">{errors.sport.message}</p>
+                            )}
+                        </div>
+                        {/* Type */}
+                        <div>
+                            <label className="flex items-center gap-2 mb-2 font-medium">
+                                <ListChecks className="h-5 w-5 text-green-700" />
+                                Type
+                            </label>
+                            <Controller
+                                control={control}
+                                name="types"
+                                render={({ field }) => (
+                                    <>
+                                        <Popover open={typeOpen} onOpenChange={setTypeOpen}>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    role="combobox"
+                                                    aria-expanded={typeOpen}
+                                                    className={cn("w-full justify-between items-center", errors.types && "border-red-500")}
+                                                    disabled={!selectedSport}
                                                 >
-                                                    {type}
-                                                    <X
-                                                        className="ml-1 h-3 w-3 cursor-pointer"
-                                                        onClick={() =>
-                                                            field.onChange(
-                                                                field.value.filter((t: string) => t !== type)
-                                                            )
-                                                        }
-                                                    />
-                                                </span>
-                                            ))}
-                                        </div>
-                                    )}
-                                </>
+                                                    {field.value.length > 0
+                                                        ? `${field.value.length} selected`
+                                                        : "Select type(s)"}
+                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-full p-0">
+                                                <Command>
+                                                    <CommandInput placeholder="Search type..." />
+                                                    <CommandList>
+                                                        <CommandEmpty>No type found.</CommandEmpty>
+                                                        {filteredTypes.map((typeObj) => (
+                                                            <CommandItem
+                                                                key={typeObj.type}
+                                                                value={typeObj.type}
+                                                                onSelect={() => {
+                                                                    if (field.value.includes(typeObj.type)) {
+                                                                        field.onChange(
+                                                                            field.value.filter((t: string) => t !== typeObj.type)
+                                                                        );
+                                                                    } else {
+                                                                        field.onChange([
+                                                                            ...field.value,
+                                                                            typeObj.type,
+                                                                        ]);
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <Check
+                                                                    className={cn(
+                                                                        "mr-2 h-4 w-4",
+                                                                        field.value.includes(typeObj.type)
+                                                                            ? "opacity-100"
+                                                                            : "opacity-0"
+                                                                    )}
+                                                                />
+                                                                {typeObj.type}
+                                                            </CommandItem>
+                                                        ))}
+                                                    </CommandList>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
+                                        {field.value.length > 0 && (
+                                            <div className="flex flex-wrap gap-2 mt-2 w-full">
+                                                {field.value.map((type: string) => (
+                                                    <span
+                                                        key={type}
+                                                        className="inline-flex items-center px-2 py-1 bg-primary text-muted rounded text-xs"
+                                                    >
+                                                        {type}
+                                                        <X
+                                                            className="ml-1 h-3 w-3 cursor-pointer"
+                                                            onClick={() =>
+                                                                field.onChange(
+                                                                    field.value.filter((t: string) => t !== type)
+                                                                )
+                                                            }
+                                                        />
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            />
+                            {errors.types && (
+                                <p className="text-xs text-red-500 mt-1">{errors.types.message}</p>
                             )}
-                        />
-                        {errors.types && (
-                            <p className="text-xs text-red-500 mt-1">{errors.types.message}</p>
-                        )}
-                    </div>
-                    {/* Number of People Needed */}
-                    <div>
-                        <label className="flex items-center gap-2 mb-2 font-medium">
-                            <Users className="h-5 w-5 text-green-700" />
-                            Number of People Needed
-                        </label>
-                        <Controller
-                            control={control}
-                            name="peopleNeeded"
-                            render={({ field }) => (
-                                <div>
-                                    <Slider
-                                        min={1}
-                                        max={30}
-                                        step={1}
-                                        value={[field.value]}
-                                        onValueChange={([val]) => field.onChange(val)}
-                                        className="w-full"
-                                    />
-                                    <div className="text-sm mt-2 text-green-700 font-semibold">
-                                        Selected: {field.value}
-                                    </div>
-                                </div>
-                            )}
-                        />
-                        {errors.peopleNeeded && (
-                            <p className="text-xs text-red-500 mt-1">{errors.peopleNeeded.message}</p>
-                        )}
-                    </div>
-                    {/* Description (moved to end) */}
-                    <div className="md:col-span-2">
-                        <label className="flex items-center gap-2 mb-2 font-medium">
-                            <AlignLeft className="h-5 w-5 text-green-700" />
-                            Description
-                        </label>
-                        <Controller
-                            control={control}
-                            name="description"
-                            render={({ field }) => (
-                                <Textarea
-                                    {...field}
-                                    className={cn("w-full", errors.description && "border-red-500")}
-                                    placeholder="Enter description"
-                                    rows={3}
-                                />
-                            )}
-                        />
-                        {errors.description && (
-                            <p className="text-xs text-red-500 mt-1">{errors.description.message}</p>
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Date & Time Card */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Date & Time</CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Date */}
-                    <div>
-                        <label className="flex items-center gap-2 mb-2 font-medium">
-                            <CalendarIcon className="h-5 w-5 text-green-700" />
-                            Date to Start Event
-                        </label>
-                        <Controller
-                            control={control}
-                            name="date"
-                            render={({ field }) => (
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant="outline"
-                                            className={cn(
-                                                "w-full justify-start text-left font-normal",
-                                                !field.value && "text-muted-foreground",
-                                                errors.date && "border-red-500"
-                                            )}
-                                        >
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {field.value
-                                                ? format(new Date(field.value), "PPP")
-                                                : "Pick a date"}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                        <Calendar
-                                            mode="single"
-                                            selected={field.value ? new Date(field.value) : undefined}
-                                            onSelect={date => {
-                                                field.onChange(date ? date.toISOString().split("T")[0] : "");
-                                            }}
-                                            initialFocus
+                        </div>
+                        {/* Number of People Needed */}
+                        <div>
+                            <label className="flex items-center gap-2 mb-2 font-medium">
+                                <Users className="h-5 w-5 text-green-700" />
+                                Number of People Needed
+                            </label>
+                            <Controller
+                                control={control}
+                                name="peopleNeeded"
+                                render={({ field }) => (
+                                    <div>
+                                        <Slider
+                                            min={1}
+                                            max={30}
+                                            step={1}
+                                            value={[field.value]}
+                                            onValueChange={([val]) => field.onChange(val)}
+                                            className="w-full"
                                         />
-                                    </PopoverContent>
-                                </Popover>
+                                        <div className="text-sm mt-2 text-green-700 font-semibold">
+                                            Selected: {field.value}
+                                        </div>
+                                    </div>
+                                )}
+                            />
+                            {errors.peopleNeeded && (
+                                <p className="text-xs text-red-500 mt-1">{errors.peopleNeeded.message}</p>
                             )}
-                        />
-                        {errors.date && (
-                            <p className="text-xs text-red-500 mt-1">{errors.date.message}</p>
-                        )}
-                    </div>
-                    {/* Time */}
-                    <div>
-                        <label className="flex items-center gap-2 mb-2 font-medium">
-                            <Clock className="h-5 w-5 text-green-700" />
-                            Time
-                        </label>
-                        <Controller
-                            control={control}
-                            name="time"
-                            render={({ field }) => (
-                                <Popover open={timeOpen} onOpenChange={setTimeOpen}>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant="outline"
-                                            role="combobox"
-                                            aria-expanded={timeOpen}
-                                            className={cn("w-full justify-between items-center", errors.time && "border-red-500")}
-                                        >
-                                            {field.value
-                                                ? field.value
-                                                : "Select time"}
-                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-full p-0 max-h-[300px] overflow-y-auto">
-                                        <Command>
-                                            <CommandInput placeholder="Search time..." />
-                                            <CommandList>
-                                                <CommandEmpty>No time found.</CommandEmpty>
-                                                {timeIntervals.map((time) => (
-                                                    <CommandItem
-                                                        key={time}
-                                                        value={time}
-                                                        onSelect={() => {
-                                                            field.onChange(time);
-                                                            setTimeOpen(false);
-                                                        }}
-                                                    >
-                                                        <Check
-                                                            className={cn(
-                                                                "mr-2 h-4 w-4",
-                                                                field.value === time
-                                                                    ? "opacity-100"
-                                                                    : "opacity-0"
-                                                            )}
-                                                        />
-                                                        {time}
-                                                    </CommandItem>
-                                                ))}
-                                            </CommandList>
-                                        </Command>
-                                    </PopoverContent>
-                                </Popover>
+                        </div>
+                        {/* Description (moved to end) */}
+                        <div className="md:col-span-2">
+                            <label className="flex items-center gap-2 mb-2 font-medium">
+                                <AlignLeft className="h-5 w-5 text-green-700" />
+                                Description
+                            </label>
+                            <Controller
+                                control={control}
+                                name="description"
+                                render={({ field }) => (
+                                    <Textarea
+                                        {...field}
+                                        className={cn("w-full", errors.description && "border-red-500")}
+                                        placeholder="Enter description"
+                                        rows={3}
+                                    />
+                                )}
+                            />
+                            {errors.description && (
+                                <p className="text-xs text-red-500 mt-1">{errors.description.message}</p>
                             )}
-                        />
-                        {errors.time && (
-                            <p className="text-xs text-red-500 mt-1">{errors.time.message}</p>
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
+                        </div>
+                    </CardContent>
+                </Card>
 
-            {/* Location Card */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Location</CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* State */}
-                    <div>
-                        <label className="flex items-center gap-2 mb-2 font-medium">
-                            <LocateFixed className="h-5 w-5 text-green-700" />
-                            State
-                        </label>
-                        <Controller
-                            control={control}
-                            name="state"
-                            render={({ field }) => (
-                                <Popover open={stateOpen} onOpenChange={setStateOpen}>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant="outline"
-                                            role="combobox"
-                                            aria-expanded={stateOpen}
-                                            className={cn("w-full justify-between items-center", errors.state && "border-red-500")}
-                                        >
-                                            {field.value
-                                                ? field.value
-                                                : "Select state"}
-                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-full p-0">
-                                        <Command>
-                                            <CommandInput placeholder="Search state..." />
-                                            <CommandList>
-                                                <CommandEmpty>No state found.</CommandEmpty>
-                                                {indianStates.map((state) => (
-                                                    <CommandItem
-                                                        key={state.name}
-                                                        value={state.name}
-                                                        onSelect={() => {
-                                                            field.onChange(state.name);
-                                                            setStateOpen(false);
-                                                        }}
-                                                    >
-                                                        <Check
-                                                            className={cn(
-                                                                "mr-2 h-4 w-4",
-                                                                field.value === state.name
-                                                                    ? "opacity-100"
-                                                                    : "opacity-0"
-                                                            )}
-                                                        />
-                                                        {state.name}
-                                                    </CommandItem>
-                                                ))}
-                                            </CommandList>
-                                        </Command>
-                                    </PopoverContent>
-                                </Popover>
+                {/* Date & Time Card */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Date & Time</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Date */}
+                        <div>
+                            <label className="flex items-center gap-2 mb-2 font-medium">
+                                <CalendarIcon className="h-5 w-5 text-green-700" />
+                                Date to Start Event
+                            </label>
+                            <Controller
+                                control={control}
+                                name="date"
+                                render={({ field }) => (
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                className={cn(
+                                                    "w-full justify-start text-left font-normal",
+                                                    !field.value && "text-muted-foreground",
+                                                    errors.date && "border-red-500"
+                                                )}
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {field.value
+                                                    ? format(new Date(field.value), "PPP")
+                                                    : "Pick a date"}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar
+                                                mode="single"
+                                                selected={field.value ? new Date(field.value) : undefined}
+                                                onSelect={date => {
+                                                    field.onChange(date ? date.toISOString().split("T")[0] : "");
+                                                }}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                )}
+                            />
+                            {errors.date && (
+                                <p className="text-xs text-red-500 mt-1">{errors.date.message}</p>
                             )}
-                        />
-                        {errors.state && (
-                            <p className="text-xs text-red-500 mt-1">{errors.state.message}</p>
-                        )}
-                    </div>
-                    {/* City */}
-                    <div>
-                        <label className="flex items-center gap-2 mb-2 font-medium">
-                            <MapPin className="h-5 w-5 text-green-700" />
-                            City
-                        </label>
-                        <Controller
-                            control={control}
-                            name="city"
-                            render={({ field }) => (
-                                <Popover open={cityOpen} onOpenChange={setCityOpen}>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant="outline"
-                                            role="combobox"
-                                            aria-expanded={cityOpen}
-                                            className={cn("w-full justify-between items-center", errors.city && "border-red-500")}
-                                            disabled={!selectedState}
-                                        >
-                                            {field.value
-                                                ? field.value
-                                                : "Select city"}
-                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-full p-0">
-                                        <Command>
-                                            <CommandInput placeholder="Search city..." />
-                                            <CommandList>
-                                                <CommandEmpty>No city found.</CommandEmpty>
-                                                {filteredCities.map((city) => (
-                                                    <CommandItem
-                                                        key={city}
-                                                        value={city}
-                                                        onSelect={() => {
-                                                            field.onChange(city);
-                                                            setCityOpen(false);
-                                                        }}
-                                                    >
-                                                        <Check
-                                                            className={cn(
-                                                                "mr-2 h-4 w-4",
-                                                                field.value === city
-                                                                    ? "opacity-100"
-                                                                    : "opacity-0"
-                                                            )}
-                                                        />
-                                                        {city}
-                                                    </CommandItem>
-                                                ))}
-                                            </CommandList>
-                                        </Command>
-                                    </PopoverContent>
-                                </Popover>
+                        </div>
+                        {/* Time */}
+                        <div>
+                            <label className="flex items-center gap-2 mb-2 font-medium">
+                                <Clock className="h-5 w-5 text-green-700" />
+                                Time
+                            </label>
+                            <Controller
+                                control={control}
+                                name="time"
+                                render={({ field }) => (
+                                    <Popover open={timeOpen} onOpenChange={setTimeOpen}>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                role="combobox"
+                                                aria-expanded={timeOpen}
+                                                className={cn("w-full justify-between items-center", errors.time && "border-red-500")}
+                                            >
+                                                {field.value
+                                                    ? field.value
+                                                    : "Select time"}
+                                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-full p-0 max-h-[300px] overflow-y-auto">
+                                            <Command>
+                                                <CommandInput placeholder="Search time..." />
+                                                <CommandList>
+                                                    <CommandEmpty>No time found.</CommandEmpty>
+                                                    {timeIntervals.map((time) => (
+                                                        <CommandItem
+                                                            key={time}
+                                                            value={time}
+                                                            onSelect={() => {
+                                                                field.onChange(time);
+                                                                setTimeOpen(false);
+                                                            }}
+                                                        >
+                                                            <Check
+                                                                className={cn(
+                                                                    "mr-2 h-4 w-4",
+                                                                    field.value === time
+                                                                        ? "opacity-100"
+                                                                        : "opacity-0"
+                                                                )}
+                                                            />
+                                                            {time}
+                                                        </CommandItem>
+                                                    ))}
+                                                </CommandList>
+                                            </Command>
+                                        </PopoverContent>
+                                    </Popover>
+                                )}
+                            />
+                            {errors.time && (
+                                <p className="text-xs text-red-500 mt-1">{errors.time.message}</p>
                             )}
-                        />
-                        {errors.city && (
-                            <p className="text-xs text-red-500 mt-1">{errors.city.message}</p>
-                        )}
-                    </div>
-                    {/* Address */}
-                    <div className="md:col-span-2">
-                        <label className="flex items-center gap-2 mb-2 font-medium">
-                            <MapPin className="h-5 w-5 text-green-700" />
-                            Address
-                        </label>
-                        <Controller
-                            control={control}
-                            name="address"
-                            render={({ field }) => (
-                                <Textarea
-                                    {...field}
-                                    className={cn("w-full", errors.address && "border-red-500")}
-                                    placeholder="Enter address"
-                                    rows={2}
-                                />
-                            )}
-                        />
-                        {errors.address && (
-                            <p className="text-xs text-red-500 mt-1">{errors.address.message}</p>
-                        )}
-                    </div>
-                    {/* Link to Address */}
-                    <div className="md:col-span-2">
-                        <label className="flex items-center gap-2 mb-2 font-medium">
-                            <Link2 className="h-5 w-5 text-green-700" />
-                            Link to Address
-                        </label>
-                        <Controller
-                            control={control}
-                            name="addressLink"
-                            render={({ field }) => (
-                                <Input
-                                    {...field}
-                                    type="url"
-                                    className={cn("w-full", errors.addressLink && "border-red-500")}
-                                    placeholder="Paste Google Maps link (optional)"
-                                />
-                            )}
-                        />
-                        {errors.addressLink && (
-                            <p className="text-xs text-red-500 mt-1">{errors.addressLink.message}</p>
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
+                        </div>
+                    </CardContent>
+                </Card>
 
-            {/* Cover Photo Card */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Cover Photo</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Controller
-                        control={control}
-                        name="coverPhoto"
-                        render={({ field }) => (
-                            <div
-                                className="flex flex-col items-center justify-center border-2 border-dashed rounded-xl py-8 px-4"
-                                style={{
-                                    background: "var(--card)",
-                                    borderColor: "var(--border)",
-                                }}
-                            >
+                {/* Location Card */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Location</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* State */}
+                        <div>
+                            <label className="flex items-center gap-2 mb-2 font-medium">
+                                <LocateFixed className="h-5 w-5 text-green-700" />
+                                State
+                            </label>
+                            <Controller
+                                control={control}
+                                name="state"
+                                render={({ field }) => (
+                                    <Popover open={stateOpen} onOpenChange={setStateOpen}>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                role="combobox"
+                                                aria-expanded={stateOpen}
+                                                className={cn("w-full justify-between items-center", errors.state && "border-red-500")}
+                                            >
+                                                {field.value
+                                                    ? field.value
+                                                    : "Select state"}
+                                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-full p-0">
+                                            <Command>
+                                                <CommandInput placeholder="Search state..." />
+                                                <CommandList>
+                                                    <CommandEmpty>No state found.</CommandEmpty>
+                                                    {indianStates.map((state) => (
+                                                        <CommandItem
+                                                            key={state.name}
+                                                            value={state.name}
+                                                            onSelect={() => {
+                                                                field.onChange(state.name);
+                                                                setStateOpen(false);
+                                                            }}
+                                                        >
+                                                            <Check
+                                                                className={cn(
+                                                                    "mr-2 h-4 w-4",
+                                                                    field.value === state.name
+                                                                        ? "opacity-100"
+                                                                        : "opacity-0"
+                                                                )}
+                                                            />
+                                                            {state.name}
+                                                        </CommandItem>
+                                                    ))}
+                                                </CommandList>
+                                            </Command>
+                                        </PopoverContent>
+                                    </Popover>
+                                )}
+                            />
+                            {errors.state && (
+                                <p className="text-xs text-red-500 mt-1">{errors.state.message}</p>
+                            )}
+                        </div>
+                        {/* City */}
+                        <div>
+                            <label className="flex items-center gap-2 mb-2 font-medium">
+                                <MapPin className="h-5 w-5 text-green-700" />
+                                City
+                            </label>
+                            <Controller
+                                control={control}
+                                name="city"
+                                render={({ field }) => (
+                                    <Popover open={cityOpen} onOpenChange={setCityOpen}>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                role="combobox"
+                                                aria-expanded={cityOpen}
+                                                className={cn("w-full justify-between items-center", errors.city && "border-red-500")}
+                                                disabled={!selectedState}
+                                            >
+                                                {field.value
+                                                    ? field.value
+                                                    : "Select city"}
+                                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-full p-0">
+                                            <Command>
+                                                <CommandInput placeholder="Search city..." />
+                                                <CommandList>
+                                                    <CommandEmpty>No city found.</CommandEmpty>
+                                                    {filteredCities.map((city) => (
+                                                        <CommandItem
+                                                            key={city}
+                                                            value={city}
+                                                            onSelect={() => {
+                                                                field.onChange(city);
+                                                                setCityOpen(false);
+                                                            }}
+                                                        >
+                                                            <Check
+                                                                className={cn(
+                                                                    "mr-2 h-4 w-4",
+                                                                    field.value === city
+                                                                        ? "opacity-100"
+                                                                        : "opacity-0"
+                                                                )}
+                                                            />
+                                                            {city}
+                                                        </CommandItem>
+                                                    ))}
+                                                </CommandList>
+                                            </Command>
+                                        </PopoverContent>
+                                    </Popover>
+                                )}
+                            />
+                            {errors.city && (
+                                <p className="text-xs text-red-500 mt-1">{errors.city.message}</p>
+                            )}
+                        </div>
+                        {/* Address */}
+                        <div className="md:col-span-2">
+                            <label className="flex items-center gap-2 mb-2 font-medium">
+                                <MapPin className="h-5 w-5 text-green-700" />
+                                Address
+                            </label>
+                            <Controller
+                                control={control}
+                                name="address"
+                                render={({ field }) => (
+                                    <Textarea
+                                        {...field}
+                                        className={cn("w-full", errors.address && "border-red-500")}
+                                        placeholder="Enter address"
+                                        rows={2}
+                                    />
+                                )}
+                            />
+                            {errors.address && (
+                                <p className="text-xs text-red-500 mt-1">{errors.address.message}</p>
+                            )}
+                        </div>
+                        {/* Link to Address */}
+                        <div className="md:col-span-2">
+                            <label className="flex items-center gap-2 mb-2 font-medium">
+                                <Link2 className="h-5 w-5 text-green-700" />
+                                Link to Address
+                            </label>
+                            <Controller
+                                control={control}
+                                name="addressLink"
+                                render={({ field }) => (
+                                    <Input
+                                        {...field}
+                                        type="url"
+                                        className={cn("w-full", errors.addressLink && "border-red-500")}
+                                        placeholder="Paste Google Maps link (optional)"
+                                    />
+                                )}
+                            />
+                            {errors.addressLink && (
+                                <p className="text-xs text-red-500 mt-1">{errors.addressLink.message}</p>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Privacy Card */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Privacy</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center gap-8 mb-4">
+                            <Controller
+                                control={control}
+                                name="privacy"
+                                render={({ field }) => (
+                                    <>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                value="public"
+                                                checked={field.value === "public"}
+                                                onChange={() => field.onChange("public")}
+                                                className="accent-green-700"
+                                            />
+                                            Public
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                value="private"
+                                                checked={field.value === "private"}
+                                                onChange={() => field.onChange("private")}
+                                                className="accent-green-700"
+                                            />
+                                            Private
+                                        </label>
+                                    </>
+                                )}
+                            />
+                        </div>
+                        {selectedPrivacy === "private" && (
+                            <div className="max-w-xs">
+                                <label className="block mb-2 font-medium text-green-700">Event Password</label>
+                                <Controller
+                                    control={control}
+                                    name="eventPassword"
+                                    render={({ field }) => (
+                                        <Input
+                                            {...field}
+                                            type="password"
+                                            className={cn("w-full", errors.eventPassword && "border-red-500")}
+                                            placeholder="Enter event password"
+                                        />
+                                    )}
+                                />
+                                {errors.eventPassword && (
+                                    <p className="text-xs text-red-500 mt-1">{errors.eventPassword.message}</p>
+                                )}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Cover Photo Card */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Cover Photo</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <Controller
+                            control={control}
+                            name="coverPhoto"
+                            render={({ field }) => (
                                 <div
-                                    className="flex flex-col items-center mb-4 w-full border-2 border-dashed rounded-xl py-6"
+                                    className="flex flex-col items-center justify-center border-2 border-dashed rounded-xl py-8 px-4"
                                     style={{
-                                        background: "var(--background)",
+                                        background: "var(--card)",
                                         borderColor: "var(--border)",
                                     }}
                                 >
                                     <div
-                                        className="rounded-full p-4 mb-2"
-                                        style={{ background: "var(--secondary)" }}
-                                    >
-                                        <ImagePlus className="h-8 w-8" style={{ color: "var(--primary)" }} />
-                                    </div>
-                                    <h2 className="text-lg font-semibold mb-1" style={{ color: "var(--primary)" }}>
-                                        Upload Cover Photo
-                                    </h2>
-                                    <p className="text-sm mb-2" style={{ color: "var(--secondary-foreground)" }}>
-                                        Drag and drop your image here, or click to browse
-                                    </p>
-                                    <label
-                                        htmlFor="cover-photo-upload"
-                                        className="flex flex-col items-center justify-center w-full cursor-pointer"
+                                        className="flex flex-col items-center mb-4 w-full border-2 border-dashed rounded-xl py-6"
+                                        style={{
+                                            background: "var(--background)",
+                                            borderColor: "var(--border)",
+                                        }}
                                     >
                                         <div
-                                            className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg transition mb-2"
-                                            style={{
-                                                borderColor: "var(--accent)",
-                                            }}
+                                            className="rounded-full p-4 mb-2"
+                                            style={{ background: "var(--secondary)" }}
                                         >
-                                            <UploadCloud className="h-8 w-8 mb-2" style={{ color: "var(--primary)" }} />
-                                            <span className="text-sm" style={{ color: "var(--primary)" }}>
-                                                Drag & drop or click to select
-                                            </span>
+                                            <ImagePlus className="h-8 w-8" style={{ color: "var(--primary)" }} />
                                         </div>
-                                        <input
-                                            id="cover-photo-upload"
-                                            type="file"
-                                            accept="image/*"
-                                            className="hidden"
-                                            onChange={e => {
-                                                const file = e.target.files?.[0];
-                                                field.onChange(file);
-                                            }}
+                                        <h2 className="text-lg font-semibold mb-1" style={{ color: "var(--primary)" }}>
+                                            Upload Cover Photo
+                                        </h2>
+                                        <p className="text-sm mb-2" style={{ color: "var(--secondary-foreground)" }}>
+                                            Drag and drop your image here, or click to browse
+                                        </p>
+                                        <label
+                                            htmlFor="cover-photo-upload"
+                                            className="flex flex-col items-center justify-center w-full p-3 cursor-pointer"
+                                        >
+                                            <div
+                                                className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg transition mb-2"
+                                                style={{
+                                                    borderColor: "var(--accent)",
+                                                }}
+                                                onDragOver={e => e.preventDefault()}
+                                                onDragEnter={e => e.preventDefault()}
+                                                onDrop={e => {
+                                                    e.preventDefault();
+                                                    const file = e.dataTransfer.files?.[0];
+                                                    if (file && file.type.startsWith("image/")) {
+                                                        field.onChange(file);
+                                                    }
+                                                }}
+                                            >
+                                                <UploadCloud className="h-8 w-8 mb-2" style={{ color: "var(--primary)" }} />
+                                                <span className="text-sm" style={{ color: "var(--primary)" }}>
+                                                    Drag & drop or click to select
+                                                </span>
+                                            </div>
+                                            <input
+                                                id="cover-photo-upload"
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={e => {
+                                                    const file = e.target.files?.[0];
+                                                    field.onChange(file);
+                                                }}
+                                            />
+                                        </label>
+                                    </div>
+                                    {field.value instanceof File && (
+                                        <img
+                                            src={URL.createObjectURL(field.value)}
+                                            alt="Cover Preview"
+                                            className="mt-4 rounded-lg max-h-48 object-cover border"
                                         />
-                                    </label>
+                                    )}
                                 </div>
-                                {field.value instanceof File && (
-                                    <img
-                                        src={URL.createObjectURL(field.value)}
-                                        alt="Cover Preview"
-                                        className="mt-4 rounded-lg max-h-48 object-cover border"
-                                    />
-                                )}
-                            </div>
+                            )}
+                        />
+                        {errors.coverPhoto && (
+                            <p className="text-xs text-red-500 mt-1">{errors.coverPhoto.message}</p>
                         )}
-                    />
-                    {errors.coverPhoto && (
-                        <p className="text-xs text-red-500 mt-1">{errors.coverPhoto.message}</p>
-                    )}
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
 
-            {/* Action Buttons */}
-            <div className="flex gap-4 justify-end">
-                <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => window.history.back()}
-                >
-                    Cancel
-                </Button>
-                <Button type="submit">
-                    Submit
-                </Button>
-            </div>
-        </form></>
+                {/* Action Buttons */}
+                <div className="flex gap-4 justify-end">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => window.history.back()}
+                    >
+                        Cancel
+                    </Button>
+                    <Button type="submit">
+                        Submit
+                    </Button>
+                </div>
+            </form>
+        </>
     );
 }

@@ -45,9 +45,9 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklab(93.528% -0.0106 0.0092);
+  --background: oklab(93.58999999999999% -0.00562 0.00375);
   --foreground: oklch(0.145 0 0);
-  --card: oklab(93.528% -0.0106 0.0092);
+  --card: oklab(93.58999999999999% -0.00562 0.00375);
   --card-foreground: oklch(0.145 0 0);
   --popover: #ebeceb;
   --popover-foreground: oklch(0.145 0 0);
