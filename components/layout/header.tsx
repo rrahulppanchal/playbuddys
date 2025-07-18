@@ -29,29 +29,18 @@ import { signOut, useSession } from "next-auth/react"
 import { useState } from "react"
 import logo from "@/assets/img/logo.png";
 
-
 function ListItem({ title, children, href, ...props }: React.ComponentPropsWithoutRef<"li"> & { href: string }) {
     return (
         <li {...props}>
-            <NavigationMenuLink asChild>
-                <Link
-                    href={href}
-                    className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                >
-                    <div className="text-sm font-medium leading-none">{title}</div>
-                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">{children}</p>
-                </Link>
+            <NavigationMenuLink href={href} className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                <div className="text-sm font-medium leading-none">{title}</div>
+                <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">{children}</p>
             </NavigationMenuLink>
         </li>
     )
 }
 
-function MobileNavItem({
-    href,
-    title,
-    description,
-    onClick,
-}: { href: string; title: string; description: string; onClick?: () => void }) {
+function MobileNavItem({ href, title, description, onClick, }: { href: string; title: string; description: string; onClick?: () => void }) {
     return (
         <Link
             href={href}
@@ -93,16 +82,11 @@ export default function Header() {
                             <NavigationMenuContent>
                                 <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                                     <li className="row-span-3">
-                                        <NavigationMenuLink asChild>
-                                            <Link
-                                                className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
-                                                href="/"
-                                            >
-                                                <div className="mb-2 mt-4 text-lg font-medium">shadcn/ui</div>
-                                                <p className="text-sm leading-tight text-muted-foreground">
-                                                    Beautifully designed components built with Tailwind CSS.
-                                                </p>
-                                            </Link>
+                                        <NavigationMenuLink href="/" className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md">
+                                            <div className="mb-2 mt-4 text-lg font-medium">shadcn/ui</div>
+                                            <p className="text-sm leading-tight text-muted-foreground">
+                                                Beautifully designed components built with Tailwind CSS.
+                                            </p>
                                         </NavigationMenuLink>
                                     </li>
                                     <ListItem href="/docs" title="Introduction">
@@ -118,8 +102,13 @@ export default function Header() {
                             </NavigationMenuContent>
                         </NavigationMenuItem>
                         <NavigationMenuItem>
-                            <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                                <Link href="/docs">Docs</Link>
+                            <NavigationMenuLink href="/docs" className={navigationMenuTriggerStyle()}>
+                                Docs
+                            </NavigationMenuLink>
+                        </NavigationMenuItem>
+                        <NavigationMenuItem>
+                            <NavigationMenuLink href="/fixtures" className={navigationMenuTriggerStyle()}>
+                                Matchs
                             </NavigationMenuLink>
                         </NavigationMenuItem>
                     </NavigationMenuList>
@@ -135,14 +124,14 @@ export default function Header() {
                             <DropdownMenuTrigger asChild>
                                 <Button variant="outline" className="rounded-full bg-transparent">
                                     <User2 size={18} />
-                                    <span className="hidden md:inline ml-2">{session?.user?.name}</span>
+                                    <span className="hidden md:inline">{session?.user?.name}</span>
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem>Profile</DropdownMenuItem>
-                                <DropdownMenuItem>Billing</DropdownMenuItem>
+                                <DropdownMenuItem onClick={()=>redirect("/create-fixture")}>Create match</DropdownMenuItem>
                                 <DropdownMenuItem>Team</DropdownMenuItem>
                                 <DropdownMenuItem>Subscription</DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => signOut()}>Log out</DropdownMenuItem>
@@ -150,13 +139,8 @@ export default function Header() {
                         </DropdownMenu>
                     ) : (
                         <>
-                            <Button variant="outline" className="rounded-full bg-transparent" onClick={() => redirect("/login")}>
-                                <User2 size={18} />
-                                <span className="hidden md:inline ml-2">Log In</span>
-                            </Button>
-                            <Button className="rounded-full" onClick={() => redirect("/get-started")}>
-                                Get Started
-                            </Button>
+                            <Button variant="outline" className="rounded-full bg-transparent" onClick={() => redirect("/login")}> <User2 size={18} /> <span className="hidden md:inline ">Log In</span> </Button>
+                            <Button className="rounded-full" onClick={() => redirect("/get-started")}> Get Started </Button>
                         </>
                     )}
                 </div>
@@ -187,7 +171,6 @@ export default function Header() {
                         <div className="flex flex-col gap-4">
                             {/* Mobile Navigation */}
                             <div className="space-y-2">
-                                {/* <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">Navigation</h3> */}
                                 <div className="space-y-1">
                                     <MobileNavItem href="/" title="Home" description="Return to the homepage" onClick={closeSheet} />
                                     <MobileNavItem
@@ -221,18 +204,10 @@ export default function Header() {
                                             <span className="font-medium">{session?.user?.name}</span>
                                         </div>
                                         <div className="space-y-1">
-                                            <Button variant="ghost" className="w-full justify-start" onClick={closeSheet}>
-                                                Profile
-                                            </Button>
-                                            <Button variant="ghost" className="w-full justify-start" onClick={closeSheet}>
-                                                Billing
-                                            </Button>
-                                            <Button variant="ghost" className="w-full justify-start" onClick={closeSheet}>
-                                                Team
-                                            </Button>
-                                            <Button variant="ghost" className="w-full justify-start" onClick={closeSheet}>
-                                                Subscription
-                                            </Button>
+                                            <Button variant="ghost" className="w-full justify-start" onClick={closeSheet}> Profile </Button>
+                                            <Button variant="ghost" className="w-full justify-start" onClick={closeSheet}> Billing </Button>
+                                            <Button variant="ghost" className="w-full justify-start" onClick={closeSheet}> Team </Button>
+                                            <Button variant="ghost" className="w-full justify-start" onClick={closeSheet}> Subscription </Button>
                                             <Button
                                                 variant="ghost"
                                                 className="w-full justify-start text-red-600 hover:text-red-600 hover:bg-red-50"

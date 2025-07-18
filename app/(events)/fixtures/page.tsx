@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { User, MessageCircle, RefreshCw, AlertCircle } from "lucide-react";
+import Header from "@/components/layout/header";
 
 export default function FixturePage() {
   const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
@@ -44,7 +45,7 @@ export default function FixturePage() {
     );
   }
 
-  return (
+  return (<><Header/>
     <div className="container mx-auto p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -201,6 +202,6 @@ export default function FixturePage() {
           ) : null}
         </div>
       </div>
-    </div>
+    </div></>
   );
 }

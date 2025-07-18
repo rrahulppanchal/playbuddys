@@ -21,6 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import Header from "@/components/layout/header";
+import Image from "next/image";
 
 // Sports and types data
 const sports = [
@@ -884,10 +885,13 @@ export default function CreateFixture() {
                                         </label>
                                     </div>
                                     {field.value instanceof File && (
-                                        <img
+                                        <Image
                                             src={URL.createObjectURL(field.value)}
                                             alt="Cover Preview"
-                                            className="mt-4 rounded-lg max-h-48 object-cover border"
+                                            className="mt-4 rounded-lg object-cover border"
+                                            style={{ maxHeight: "12rem", width: "auto" }}
+                                            width={400}
+                                            height={192}
                                         />
                                     )}
                                 </div>
