@@ -130,7 +130,7 @@ export default function Header() {
                             <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem>Profile</DropdownMenuItem>
+                                <DropdownMenuItem onClick={()=>redirect("/profile")}>Profile</DropdownMenuItem>
                                 <DropdownMenuItem onClick={()=>redirect("/create-fixture")}>Create match</DropdownMenuItem>
                                 <DropdownMenuItem>Team</DropdownMenuItem>
                                 <DropdownMenuItem>Subscription</DropdownMenuItem>
