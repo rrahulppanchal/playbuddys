@@ -22,6 +22,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import Header from "@/components/layout/header";
 import Image from "next/image";
+import { useCreateEvent } from '@/services/event/hooks';
+import { CreateEventInput } from '@/services/event/types';
 
 // Sports and types data
 const sports = [
@@ -227,8 +229,23 @@ export default function CreateFixture() {
         setValue("city", "");
     }, [selectedState, setValue]);
 
+    const createEventMutation = useCreateEvent();
+
     const onSubmit = (data: FormValues) => {
-        alert(JSON.stringify(data, null, 2));
+        // Convert File to string (coverPhoto) if needed, or remove for now
+        const payload: CreateEventInput = {
+            ...data,
+            coverPhoto: undefined, // handle file upload separately if needed
+        };
+        createEventMutation.mutate(payload, {
+            onSuccess: (res) => {
+                alert('Event created successfully!');
+                // Optionally redirect or reset form
+            },
+            onError: (err: any) => {
+                alert(err.message || 'Failed to create event');
+            },
+        });
     };
 
     return (
