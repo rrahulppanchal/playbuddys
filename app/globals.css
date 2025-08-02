@@ -121,3 +121,20 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom grid layout for large screens */
+@media (min-width: 1024px) {
+  .grid-cols-3 {
+    grid-template-columns: 20% 50% 30% !important;
+  }
+}
+
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}

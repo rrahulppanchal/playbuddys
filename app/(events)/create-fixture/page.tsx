@@ -24,9 +24,10 @@ import Header from "@/components/layout/header";
 import Image from "next/image";
 import { useCreateEvent } from '@/services/event/hooks';
 import { CreateEventInput } from '@/services/event/types';
+import { cities } from '@/types/cities';
 
 // Sports and types data
-const sports = [
+export const sports = [
     { id: 1, sport: "Cricket" },
     { id: 2, sport: "Football" },
     { id: 3, sport: "Hockey" },
@@ -132,14 +133,44 @@ const types = [
     { sport_id: 19, type: "Competitive" },
 ];
 
-// Indian states and cities (sample, add more as needed)
+// Indian states and union territories
 const indianStates = [
-    { name: "Maharashtra", cities: ["Mumbai", "Pune", "Nagpur", "Nashik"] },
-    { name: "Karnataka", cities: ["Bengaluru", "Mysuru", "Mangalore", "Hubli"] },
-    { name: "Delhi", cities: ["New Delhi", "Dwarka", "Rohini", "Saket"] },
-    { name: "Tamil Nadu", cities: ["Chennai", "Coimbatore", "Madurai", "Salem"] },
-    { name: "West Bengal", cities: ["Kolkata", "Howrah", "Durgapur", "Siliguri"] },
-    { name: "Uttar Pradesh", cities: ["Lucknow", "Kanpur", "Agra", "Varanasi"] },
+    "Andhra Pradesh",
+    "Arunachal Pradesh", 
+    "Assam",
+    "Bihar",
+    "Chhattisgarh",
+    "Goa",
+    "Gujarat",
+    "Haryana",
+    "Himachal Pradesh",
+    "Jharkhand",
+    "Karnataka",
+    "Kerala",
+    "Madhya Pradesh",
+    "Maharashtra",
+    "Manipur",
+    "Meghalaya",
+    "Mizoram",
+    "Nagaland",
+    "Odisha",
+    "Punjab",
+    "Rajasthan",
+    "Sikkim",
+    "Tamil Nadu",
+    "Telangana",
+    "Tripura",
+    "Uttar Pradesh",
+    "Uttarakhand",
+    "West Bengal",
+    "Andaman and Nicobar Islands",
+    "Chandigarh",
+    "Dadra and Nagar Haveli and Daman and Diu",
+    "Delhi",
+    "Jammu and Kashmir",
+    "Ladakh",
+    "Lakshadweep",
+    "Puducherry",
 ];
 
 // Time intervals (15 min gap)
@@ -213,20 +244,20 @@ export default function CreateFixture() {
         ? types.filter((t) => t.sport_id === selectedSport)
         : [];
 
-    // Filter cities by selected state
-    const filteredCities =
-        selectedState && selectedState.length > 0
-            ? indianStates.find((s) => s.name === selectedState)?.cities || []
-            : [];
+    // Filter cities by search query
+    const [citySearchQuery, setCitySearchQuery] = React.useState("");
+    const filteredCities = cities.filter((city) =>
+        city.toLowerCase().includes(citySearchQuery.toLowerCase())
+    );
 
     // Reset types when sport changes
     React.useEffect(() => {
         setValue("types", []);
     }, [selectedSport, setValue]);
 
-    // Reset city when state changes
+    // Reset city when state changes (keeping for compatibility)
     React.useEffect(() => {
-        setValue("city", "");
+        // setValue("city", ""); // Removed since cities are now independent of state
     }, [selectedState, setValue]);
 
     const createEventMutation = useCreateEvent();
@@ -635,22 +666,22 @@ export default function CreateFixture() {
                                                     <CommandEmpty>No state found.</CommandEmpty>
                                                     {indianStates.map((state) => (
                                                         <CommandItem
-                                                            key={state.name}
-                                                            value={state.name}
+                                                            key={state}
+                                                            value={state}
                                                             onSelect={() => {
-                                                                field.onChange(state.name);
+                                                                field.onChange(state);
                                                                 setStateOpen(false);
                                                             }}
                                                         >
                                                             <Check
                                                                 className={cn(
                                                                     "mr-2 h-4 w-4",
-                                                                    field.value === state.name
+                                                                    field.value === state
                                                                         ? "opacity-100"
                                                                         : "opacity-0"
                                                                 )}
                                                             />
-                                                            {state.name}
+                                                            {state}
                                                         </CommandItem>
                                                     ))}
                                                 </CommandList>
@@ -673,14 +704,18 @@ export default function CreateFixture() {
                                 control={control}
                                 name="city"
                                 render={({ field }) => (
-                                    <Popover open={cityOpen} onOpenChange={setCityOpen}>
+                                    <Popover open={cityOpen} onOpenChange={(open) => {
+                                        setCityOpen(open);
+                                        if (!open) {
+                                            setCitySearchQuery("");
+                                        }
+                                    }}>
                                         <PopoverTrigger asChild>
                                             <Button
                                                 variant="outline"
                                                 role="combobox"
                                                 aria-expanded={cityOpen}
                                                 className={cn("w-full justify-between items-center", errors.city && "border-red-500")}
-                                                disabled={!selectedState}
                                             >
                                                 {field.value
                                                     ? field.value
@@ -690,16 +725,21 @@ export default function CreateFixture() {
                                         </PopoverTrigger>
                                         <PopoverContent className="w-full p-0">
                                             <Command>
-                                                <CommandInput placeholder="Search city..." />
+                                                <CommandInput 
+                                                    placeholder="Search city..." 
+                                                    value={citySearchQuery}
+                                                    onValueChange={setCitySearchQuery}
+                                                />
                                                 <CommandList>
                                                     <CommandEmpty>No city found.</CommandEmpty>
-                                                    {filteredCities.map((city) => (
+                                                    {filteredCities.map((city, index) => (
                                                         <CommandItem
-                                                            key={city}
+                                                            key={`${city}-${index}`}
                                                             value={city}
                                                             onSelect={() => {
                                                                 field.onChange(city);
                                                                 setCityOpen(false);
+                                                                setCitySearchQuery("");
                                                             }}
                                                         >
                                                             <Check
